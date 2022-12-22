@@ -322,7 +322,7 @@ class GameGrid extends Component {
     render() {
         return (
             <div>
-                <div className='changeGameDropDown'>
+                {/* <div className='changeGameDropDown'>
                     <DropdownButton key="gameChangeButton" title="Change Game" onSelect={this.gameChanged} variant="outline-dark" size="sm">
                         <Dropdown.Header>Game Type</Dropdown.Header>
                         <Dropdown.Item eventKey="5">5X5</Dropdown.Item>
@@ -331,7 +331,7 @@ class GameGrid extends Component {
 
 
                     </DropdownButton>
-                </div>
+                </div> */}
                 <div className='gameContainer'>
                     <div className='numberContainer'>
                         {this.createNumbers()}
