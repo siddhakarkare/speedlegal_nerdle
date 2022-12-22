@@ -9,5 +9,9 @@ Settings:
 - every grid has certain operations pre-configured for that size
 - For now, the equations to be guessed are also pre-configured
 
+Running the game:
+- `npm install`
+- `npm start`
+
 
 
