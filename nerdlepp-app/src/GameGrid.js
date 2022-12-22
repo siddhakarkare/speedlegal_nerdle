@@ -95,19 +95,20 @@ class GameGrid extends Component {
 
     }
     getCellColor(i,j) {
-        //0:white
-        //1:yellow
-        //2:green
+        //0: default
+        //1: right symbol, wrong position
+        //2: right symbol, right position
+        //3: wrong symbol
         if(this.state.bgColorGrid == undefined || this.state.bgColorGrid.length != this.state.n  || this.state.bgColorGrid[0].length != this.state.n)
-            return "grey"
+            return "#989484"
         else if(this.state.bgColorGrid[i][j] == 0)
-            return "grey"
+            return "#989484"
         else if(this.state.bgColorGrid[i][j] == 1)
-            return "yellow"
+            return "#820458"
         else if(this.state.bgColorGrid[i][j] == 2)
-            return "green"
+            return "#398874"
         else if(this.state.bgColorGrid[i][j] == 3)
-            return "brown"
+            return "#161803"
     }
     valueChanged = (e) => {
         console.log("Dummy event", e.target)
