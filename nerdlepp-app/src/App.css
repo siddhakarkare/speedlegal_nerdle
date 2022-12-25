@@ -78,6 +78,16 @@
   cursor: pointer;
 }
 
+.newGameButton {
+
+  color: rgb(184, 15, 83);
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  margin: 0.2rem 0.5rem 0.5rem 0.5rem;
+  cursor: pointer;
+}
+
 .numberContainer button {
   background-color: rgb(5, 45, 98);
   color: white;

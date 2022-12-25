@@ -1,4 +1,4 @@
-import { React, Component, Container } from 'react'
+import { React, Component } from 'react'
 import { Dropdown, DropdownButton } from 'react-bootstrap'
 import gameConfig from './gameConfig.json';
 
@@ -6,50 +6,47 @@ import gameConfig from './gameConfig.json';
 class GameGrid extends Component {
     constructor() {
         super();
-        this.state = {
-            n: "5",
-            curr: "0,0",
-            currRow: 0,
-            grid : [[]],
-            nerdle : "",
-            answer : "",
-            disableCell: [],
-            bgColorGrid: [[]]
-        };
-        this.setup()
+        this.setup(false)
         
         // console.log("GameConfig:",gameConfig[this.state.n])
     }
-    setup() {
+    setup(isSetState) {
+        if(isSetState === false){
+            this.state = {
+                n: "5",
+                curr: "0,0",
+                currRow: 0,
+                grid : [[]],
+                answer : "",
+                disableCell: [],
+                bgColorGrid: [[]]
+            };
+        }
+       
         let q = gameConfig[this.state.n]["questions"]
         let nerdle = q[Math.floor(Math.random() * q.length)]
         console.log("setting Answer:",nerdle)
         this.state.answer = nerdle
 
-        this.createGrid()
+        this.createGrid(isSetState)
 
         
     }
     gameChanged = (e) => {
         // e.preventDefault();
-        this.setup()
-        console.log("Game Changed", e);
-        
         this.state.n = e
-        
-        this.render();
+        this.setup(true)
+        console.log("Game Changed", e);
 
     };
     
-    createGrid = () =>{
-        let row = []
+    createGrid = (flg) =>{
         let disableCell1 = []
         let grid1 = []
         let bgGrid = []
-        let bgc = []
         for (let i = 0; i < this.state.n; i++) {
-            row = []
-            bgc = []
+            let row = []
+            let bgc = []
             for (let j = 0; j < this.state.n; j++) {
                 row.push("")
                 bgc.push(0)
@@ -59,14 +56,14 @@ class GameGrid extends Component {
             disableCell1.push(false)
         }
 
-        console.log(bgGrid)
-        this.setState({
-            grid : grid1
-        })
+        this.state.grid = grid1
         this.state.bgColorGrid = bgGrid
         this.state.disableCell = disableCell1
+        this.state.curr = "0,0"
+        this.state.currRow = 0
 
-        this.enableRow(0,false)
+
+        this.enableRow(0,flg)
     }
 
     createTable = () => {
@@ -76,10 +73,7 @@ class GameGrid extends Component {
         for (let i = 0; i < this.state.n; i++) {
             let children = []
             for (let j = 0; j < this.state.n; j++) {
-                let flag = true
-                if(i===0){
-                    flag = false
-                }
+                
                 children.push(<td key={"td"+i + "," + j}>
                     <input value={this.state.grid.length >0 && this.state.grid[0].length > 0 ? this.state.grid[i][j] : "" }
                     onFocus={this.inputSelected} onChange={this.valueChanged} disabled={this.state.disableCell[i]}
@@ -99,15 +93,15 @@ class GameGrid extends Component {
         //1: right symbol, wrong position
         //2: right symbol, right position
         //3: wrong symbol
-        if(this.state.bgColorGrid == undefined || this.state.bgColorGrid.length != this.state.n  || this.state.bgColorGrid[0].length != this.state.n)
+        if(this.state.bgColorGrid === undefined || this.state.bgColorGrid.length !== parseInt(this.state.n)  || this.state.bgColorGrid[0].length !== parseInt(this.state.n))
             return "#989484"
-        else if(this.state.bgColorGrid[i][j] == 0)
+        else if(this.state.bgColorGrid[i][j] === 0)
             return "#989484"
-        else if(this.state.bgColorGrid[i][j] == 1)
+        else if(this.state.bgColorGrid[i][j] === 1)
             return "#820458"
-        else if(this.state.bgColorGrid[i][j] == 2)
+        else if(this.state.bgColorGrid[i][j] === 2)
             return "#398874"
-        else if(this.state.bgColorGrid[i][j] == 3)
+        else if(this.state.bgColorGrid[i][j] === 3)
             return "#161803"
     }
     valueChanged = (e) => {
@@ -117,7 +111,7 @@ class GameGrid extends Component {
         // console.log("enabling row:",row)
         let disableCell1 = []
         for (let i = 0; i < this.state.n; i++){
-            if(i!=row)
+            if(i !== row)
                 disableCell1.push(true)
             else
                 disableCell1.push(false)
@@ -142,22 +136,26 @@ class GameGrid extends Component {
     buttonPressed = (e) => { // Sets the selected button's text (i.e. 1 for button 1 ) into the currently selected input box in the grid
         let txt = e.target.innerHTML
         this.state.userInput = txt
-
+        this.setCurrCellText(txt)
+    }
+    setCurrCellText(txt) {
         let loc = this.getCurrentRowCol()
         let i = loc[0]
         let j = loc[1]
 
         let grid1 = this.state.grid
         grid1[i][j] = txt
+        
+        console.log("Setting text:",txt)
         let nxt = ""
         if( j+1 < this.state.n){
             nxt = i+","+(parseInt(j)+1)
         }
+        console.log("Setting grid",grid1[i][j])
         this.setState({
             grid : grid1,
             curr : nxt
         })
-        
         
     }
     
@@ -186,7 +184,10 @@ class GameGrid extends Component {
         enterDelete.push(<button className="enterDeleteButton" id="buttonDelete" key="buttonDelete" onClick={this.deletePressed}>Delete</button>)
         return enterDelete
     }
-
+    deletePressed = (e) => {
+        this.setCurrCellText("")
+        
+    }
     enterPressed = (e) => {
         console.log("Enter Pressed",e)
         console.log("Total rows in background color grid:", this.state.bgColorGrid.length)
@@ -209,13 +210,14 @@ class GameGrid extends Component {
                 this.markCluesCurrRow(eqn)
 
                 let nxt = parseInt(i) + 1
-
+                
                 if(nxt<this.state.n){
                     this.enableRow(nxt, true)
                     let curr1 = nxt+","+0
                     this.setState({currRow: nxt, curr: curr1})
-
-
+                } else { //Maximum attempts reached
+                    this.disableBoard()
+                    alert("Defeat! Try Again")
                 }
             }
             
@@ -231,7 +233,7 @@ class GameGrid extends Component {
         for (let i = 0; i < this.state.n; i++){
             gr = []
             for(let j =0; j<this.state.n;j++){
-                if(i!=row)
+                if(i!==row)
                     gr.push(this.state.bgColorGrid[i][j])
                 else{
                     gr.push(2)
@@ -262,7 +264,7 @@ class GameGrid extends Component {
         let e1 = this.transform(eqn)
         let e2 = this.transform(this.state.answer)
         for(let i=0;i<e1.length;i++){
-            if(e1[i] == e2[i])
+            if(e1[i] === e2[i])
                 bgGrid[this.state.currRow][i] = 2
             else if(e2.search(e1[i]) > -1)
                 bgGrid[this.state.currRow][i] = 1
@@ -270,6 +272,7 @@ class GameGrid extends Component {
                 bgGrid[this.state.currRow][i] = 3
 
         }
+        this.state.bgColorGrid = bgGrid
     }
     transform(exp){
         //+:a
@@ -279,15 +282,15 @@ class GameGrid extends Component {
         //=:e
         let res = ""
         for(let i=0;i<exp.length; i++){
-            if( exp[i] == "+")
+            if( exp[i] === "+")
                 res += "a"
-            else if( exp[i] == "-")
+            else if( exp[i] === "-")
                 res += "s"
-            else if( exp[i] == "*")
+            else if( exp[i] === "*")
                 res += "m"
-            else if( exp[i] == "/")
+            else if( exp[i] === "/")
                 res += "d"
-            else if( exp[i] == "=")
+            else if( exp[i] === "=")
                 res += "e"
             else
                 res += exp[i]
@@ -320,9 +323,10 @@ class GameGrid extends Component {
     //     this.state.currRow = 0
     // }
     render() {
+        console.log("Rendering...")
         return (
             <div>
-                {/* <div className='changeGameDropDown'>
+                <div className='changeGameDropDown'>
                     <DropdownButton key="gameChangeButton" title="Change Game" onSelect={this.gameChanged} variant="outline-dark" size="sm">
                         <Dropdown.Header>Game Type</Dropdown.Header>
                         <Dropdown.Item eventKey="5">5X5</Dropdown.Item>
@@ -331,7 +335,7 @@ class GameGrid extends Component {
 
 
                     </DropdownButton>
-                </div> */}
+                </div>
                 <div className='gameContainer'>
                     <div className='numberContainer'>
                         {this.createNumbers()}
@@ -340,6 +344,7 @@ class GameGrid extends Component {
                         <center className='operatorContainer col '>
                             {this.createEnterDelete()}
                             {this.createOperators()}
+                            {this.createNewGame()}
                             
                         </center>
                     </div>
@@ -356,8 +361,16 @@ class GameGrid extends Component {
             
         )
     }
+    createNewGame() {
+        let newGame = []
+        newGame.push(<button className="newGameButton" id="buttonNewGame" key="buttonNewGame" onClick={this.newGamePressed}>New Game</button>)
+        return newGame
+    }
+    newGamePressed = (e) => {
+        this.setup(true)
+    }
     componentDidMount = () => {
-        this.createGrid()
+        this.createGrid(true)
     }
 }
 
